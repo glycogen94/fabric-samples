@@ -1,7 +1,5 @@
 /*
- * Copyright IBM Corp. All Rights Reserved.
- *
- * SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: Apache-2.0
 */
 
 'use strict';
@@ -79,7 +77,7 @@ class CommercialPaperContract extends Contract {
         await ctx.paperList.addPaper(paper);
 
         // Must return a serialized paper to caller of smart contract
-        return paper;
+        return paper.toBuffer();
     }
 
     /**
@@ -113,12 +111,12 @@ class CommercialPaperContract extends Contract {
         if (paper.isTrading()) {
             paper.setOwner(newOwner);
         } else {
-            throw new Error('Paper ' + issuer + paperNumber + ' is not trading. Current state = ' + paper.getCurrentState());
+            throw new Error('Paper ' + issuer + paperNumber + ' is not trading. Current state = ' + cp.getCurrentState());
         }
 
         // Update the paper
         await ctx.paperList.updatePaper(paper);
-        return paper;
+        return paper.toBuffer();
     }
 
     /**
@@ -150,7 +148,7 @@ class CommercialPaperContract extends Contract {
         }
 
         await ctx.paperList.updatePaper(paper);
-        return paper;
+        return paper.toBuffer();
     }
 
 }

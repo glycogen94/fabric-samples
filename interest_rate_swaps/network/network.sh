@@ -113,11 +113,6 @@ function networkUp() {
     echo "ERROR !!!! Unable to start network"
     exit 1
   fi
-  echo Vendoring Go dependencies ...
-  pushd ../chaincode
-  GO111MODULE=on go mod vendor
-  popd
-  echo Finished vendoring Go dependencies
   # now run the end to end script
   docker exec cli scripts/script.sh
   if [ $? -ne 0 ]; then
@@ -173,7 +168,7 @@ function generateChannelArtifacts() {
 
   echo "#########  Generating Orderer Genesis block ##############"
   mkdir channel-artifacts
-  configtxgen -profile IRSNetGenesis -outputBlock ./channel-artifacts/genesis.block -channelID system-channel
+  configtxgen -profile IRSNetGenesis -outputBlock ./channel-artifacts/genesis.block
   res=$?
   if [ $res -ne 0 ]; then
     echo "Failed to generate orderer genesis block..."
@@ -189,6 +184,9 @@ function generateChannelArtifacts() {
   fi
 }
 
+# Obtain the OS and Architecture string that will be used to select the correct
+# native binaries for your platform, e.g., darwin-amd64 or linux-amd64
+OS_ARCH=$(echo "$(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
 CHANNEL_NAME="irs"
 COMPOSE_FILE=docker-compose.yaml
 COMPOSE_PROJECT_NAME=fabric-irs

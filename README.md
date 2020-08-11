@@ -1,40 +1,27 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Hyperledger Fabric Samples
+## Hyperledger Fabric Samples
 
-You can use Fabric samples to get started working with Hyperledger Fabric, explore important Fabric features, and learn how to build applications that can interact with blockchain networks using the Fabric SDKs. To learn more about Hyperledger Fabric, visit the [Fabric documentation](https://hyperledger-fabric.readthedocs.io/en/master).
+Please visit the [installation instructions](http://hyperledger-fabric.readthedocs.io/en/latest/install.html)
+to ensure you have the correct prerequisites installed. Please use the
+version of the documentation that matches the version of the software you
+intend to use to ensure alignment.
 
-## Getting started with the Fabric samples
+## Download Binaries and Docker Images
 
-To use the Fabric samples, you need to download the Fabric Docker images and the Fabric CLI tools. First, make sure that you have installed all of the [Fabric prerequisites](https://hyperledger-fabric.readthedocs.io/en/master/prereqs.html). You can then follow the instructions to [Install the Fabric Samples, Binaries, and Docker Images](https://hyperledger-fabric.readthedocs.io/en/master/install.html) in the Fabric documentation. In addition to downloading the Fabric images and tool binaries, the instructions will make you clone the Fabric samples on your local machine.
+The [`scripts/bootstrap.sh`](https://github.com/hyperledger/fabric-samples/blob/release-1.3/scripts/bootstrap.sh)
+script will preload all of the requisite docker
+images for Hyperledger Fabric and tag them with the 'latest' tag. Optionally,
+specify a version for fabric, fabric-ca and thirdparty images. Default versions
+are 1.4.0, 1.4.0 and 0.4.14 respectively.
 
-## Guide to the Fabric samples
+```bash
+./scripts/bootstrap.sh [version] [ca version] [thirdparty_version]
+```
 
-You can use the following table to learn more about each sample, and find the corresponding tutorial or documentation.
+### Continuous Integration
 
-|  **Sample** | **Description** | **Documentation** |
-| -------------|------------------------------|------------------|
-| [Fabric test network](test-network) | Get started by deploying a basic Fabric network on your local machine. | [Using the Fabric test network](https://hyperledger-fabric.readthedocs.io/en/master/test_network.html) |
-| [Commercial paper](commercial-paper) | Explore a use case in which two organizations use a blockchain network to trade commercial paper. | [Commercial paper tutorial](https://hyperledger-fabric.readthedocs.io/en/master/tutorial/commercial_paper.html) |
-| [Interest rate swaps](interest_rate_swaps) | Explore state based endorsement using a financial services use case. | [Setting Key level endorsement policies](https://hyperledger-fabric.readthedocs.io/en/master/endorsement-policies.html#setting-key-level-endorsement-policies) |
-| [Off chain data](off_chain_data) | Learn how to use the Peer channel-based event services to build an off chain database for reporting and analytics. | [Peer channel-based event services](https://hyperledger-fabric.readthedocs.io/en/master/peer_event_services.html) |
-| [High throughput](high-throughput) | Learn how you can design your smart contracts to process a large volume of transactions. | |
-| [Chaincode](chaincode) | A set of sample smart contracts used by other samples and the tutorials in the Fabric documentation. | [Fabric tutorials](https://hyperledger-fabric.readthedocs.io/en/master/tutorials.html) |
-| [Fabcar](fabcar) | **Deprecated in favor of basic asset transfer sample** |  |
-
-### Asset transfer smart contract series
-
-The asset transfer series provides a series of smart contracts and applications that you can use to create and transfer a generic asset using Hyperledger Fabric. However, each sample is built with different smart contract and application APIs in order to demonstrate different Fabric features. The **Basic** sample provides an introduction on how to write smart contracts and how to interact with a Fabric network using the Fabric SDKs. The **Secured agreement** sample demonstrates how to use more advanced capabilities to develop a more realistic transfer scenario.
-
-|  **Smart Contract** | **Description** | **Tutorial** | **Smart contract languages** | **Application languages** |
-| -----------|------------------------------|----------|---------|---------|
-| [Basic](asset-transfer-basic) | The Basic sample smart contract that allows you to create and transfer an asset by putting data on the ledger and retrieving it. This sample is recommended for new Fabric users. | [Writing your first application](https://hyperledger-fabric.readthedocs.io/en/master/write_first_app.html) | Go, JavaScript, Typescript, Java | JavaScript, Java |
-| [Ledger queries](asset-transfer-ledger-queries) | The ledger queries sample demonstrates how to deploy an index with your chaincode and issue rich queries when you are using CouchDB as your state database. | **Coming soon** | Go, JavaScript | Java |
-| [Private data](asset-transfer-private-data) | This sample demonstrates the use of private data collections and how the private data hash can be used to verify an agreement before executing a transfer | **Coming soon** | Go | JavaScript |
-| [State-Based Endorsement](asset-transfer-sbe) | This sample demonstrates the use of state-based endorsements and how the default chaincode endorsement policy can be modified for a specified Key | **Coming soon** | Go, JavaScript, Java | **Coming soon** |
-| [Secured agreement](asset-transfer-secured-agreement) | Smart contract that uses private data, state based endorsement, and access control to establish the ownership of an asset, guarantee immutability, and securely transfer an asset with the consent of both the buyer and the owner, while keeping the asset details private. | [Secured asset transfer in Fabric](https://hyperledger-fabric.readthedocs.io/en/master/secured_private_asset_transfer_tutorial.html)  | Go | **Coming soon** |
-
-The asset transfer series is still a work in progress. Additional smart contract and application languages are being developed. The series will also be integrated with other Fabric samples and the documentation in the near future. For more information, see the public plan for [Fabric samples improvements](https://docs.google.com/presentation/d/1UxK2HH8SrQyZU58MnuDb9hr1nmekst8b/edit#slide=id.g776cdbfb06_0_51).
+Please have a look at [Continuous Integration Process](docs/fabric-samples-ci.md)
 
 ## License <a name="license"></a>
 

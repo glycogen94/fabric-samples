@@ -12,33 +12,44 @@ export MSYS_NO_PATHCONV=1
 starttime=$(date +%s)
 CC_SRC_LANGUAGE=${1:-"go"}
 CC_SRC_LANGUAGE=`echo "$CC_SRC_LANGUAGE" | tr [:upper:] [:lower:]`
-
-if [ "$CC_SRC_LANGUAGE" = "go" -o "$CC_SRC_LANGUAGE" = "golang" ] ; then
-	CC_SRC_PATH="../chaincode/fabcar/go/"
+if [ "$CC_SRC_LANGUAGE" = "go" -o "$CC_SRC_LANGUAGE" = "golang"  ]; then
+	CC_RUNTIME_LANGUAGE=golang
+	CC_SRC_PATH=github.com/fabcar/go
 elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
-	CC_SRC_PATH="../chaincode/fabcar/javascript/"
-elif [ "$CC_SRC_LANGUAGE" = "java" ]; then
-	CC_SRC_PATH="../chaincode/fabcar/java"
+	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
+	CC_SRC_PATH=/opt/gopath/src/github.com/fabcar/javascript
 elif [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
-	CC_SRC_PATH="../chaincode/fabcar/typescript/"
+	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
+	CC_SRC_PATH=/opt/gopath/src/github.com/fabcar/typescript
+	echo Compiling TypeScript code into JavaScript ...
+	pushd ../chaincode/fabcar/typescript
+	npm install
+	npm run build
+	popd
+	echo Finished compiling TypeScript code into JavaScript
 else
 	echo The chaincode language ${CC_SRC_LANGUAGE} is not supported by this script
-	echo Supported chaincode languages are: go, java, javascript, and typescript
+	echo Supported chaincode languages are: go, javascript, and typescript
 	exit 1
 fi
 
-# clean out any old identites in the wallets
-rm -rf javascript/wallet/*
-rm -rf java/wallet/*
-rm -rf typescript/wallet/*
-rm -rf go/wallet/*
+
+# clean the keystore
+rm -rf ./hfc-key-store
 
 # launch network; create channel and join peer to channel
-pushd ../test-network
-./network.sh down
-./network.sh up createChannel -ca -s couchdb
-./network.sh deployCC -ccn fabcar -ccv 1 -cci initLedger -ccl ${CC_SRC_LANGUAGE} -ccp ${CC_SRC_PATH}
-popd
+cd ../basic-network
+./start.sh
+
+# Now launch the CLI container in order to install, instantiate chaincode
+# and prime the ledger with our 10 cars
+docker-compose -f ./docker-compose.yml up -d cli
+docker ps -a
+
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n fabcar -v 1.0 -p "$CC_SRC_PATH" -l "$CC_RUNTIME_LANGUAGE"
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n fabcar -l "$CC_RUNTIME_LANGUAGE" -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
+sleep 10
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n fabcar -c '{"function":"initLedger","Args":[]}'
 
 cat <<EOF
 
@@ -57,7 +68,7 @@ JavaScript:
     npm install
 
   Then run the following applications to enroll the admin user, and register a new user
-  called appUser which will be used by the other applications to interact with the deployed
+  called user1 which will be used by the other applications to interact with the deployed
   FabCar contract:
     node enrollAdmin
     node registerUser
@@ -82,7 +93,7 @@ TypeScript:
     npm run build
 
   Then run the following applications to enroll the admin user, and register a new user
-  called appUser which will be used by the other applications to interact with the deployed
+  called user1 which will be used by the other applications to interact with the deployed
   FabCar contract:
     node dist/enrollAdmin
     node dist/registerUser
@@ -94,35 +105,5 @@ TypeScript:
   You can run the query application as follows. By default, the query application will
   return all cars, but you can update the application to evaluate other transactions:
     node dist/query
-
-Java:
-
-  Start by changing into the "java" directory:
-    cd java
-
-  Then, install dependencies and run the test using:
-    mvn test
-
-  The test will invoke the sample client app which perform the following:
-    - Enroll admin and appUser and import them into the wallet (if they don't already exist there)
-    - Submit a transaction to create a new car
-    - Evaluate a transaction (query) to return details of this car
-    - Submit a transaction to change the owner of this car
-    - Evaluate a transaction (query) to return the updated details of this car
-
-Go:
-
-  Start by changing into the "go" directory:
-    cd go
-
-  Then, install dependencies and run the test using:
-    go run fabcar.go
-
-  The test will invoke the sample client app which perform the following:
-    - Import user credentials into the wallet (if they don't already exist there)
-    - Submit a transaction to create a new car
-    - Evaluate a transaction (query) to return details of this car
-    - Submit a transaction to change the owner of this car
-    - Evaluate a transaction (query) to return the updated details of this car
 
 EOF

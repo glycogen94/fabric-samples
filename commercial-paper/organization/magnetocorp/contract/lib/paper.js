@@ -1,7 +1,5 @@
 /*
- * Copyright IBM Corp. All Rights Reserved.
- *
- * SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: Apache-2.0
 */
 
 'use strict';
@@ -74,7 +72,7 @@ class CommercialPaper extends State {
     }
 
     static fromBuffer(buffer) {
-        return CommercialPaper.deserialize(buffer);
+        return CommercialPaper.deserialize(Buffer.from(JSON.parse(buffer)));
     }
 
     toBuffer() {
