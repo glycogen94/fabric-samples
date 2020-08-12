@@ -77,6 +77,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.queryAllCars(APIstub)
 	} else if function == "changeCarOwner" {
 		return s.changeCarOwner(APIstub, args)
+	} else if function == "changeCarColour" {
+		return s.changeCarColour(APIstub, args)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
@@ -186,6 +188,24 @@ func (s *SmartContract) changeCarOwner(APIstub shim.ChaincodeStubInterface, args
 
 	json.Unmarshal(carAsBytes, &car)
 	car.Owner = args[1]
+
+	carAsBytes, _ = json.Marshal(car)
+	APIstub.PutState(args[0], carAsBytes)
+
+	return shim.Success(nil)
+}
+
+func (s *SmartContract) changeCarColour(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	carAsBytes, _ := APIstub.GetState(args[0])
+	car := Car{}
+
+	json.Unmarshal(carAsBytes, &car)
+	car.Colour = args[1]
 
 	carAsBytes, _ = json.Marshal(car)
 	APIstub.PutState(args[0], carAsBytes)
